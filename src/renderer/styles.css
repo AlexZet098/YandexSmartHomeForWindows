@@ -15,6 +15,17 @@
   font-family: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+body[data-theme="light"] {
+  --bg: #f3f4f8;
+  --surface: #ffffff;
+  --surface-soft: #eceef5;
+  --surface-strong: #dde1ea;
+  --text: #202431;
+  --muted: #6e7482;
+  --subtle: #8c93a1;
+  --border: rgba(32, 36, 49, 0.08);
+}
+
 body[data-theme="dark"] {
   --bg: #11131b;
   --surface: #202432;
@@ -491,7 +502,6 @@ h1 {
 }
 
 .property-chip:hover,
-.property-chip.pinned,
 .detail-row.clickable:hover,
 .detail-row.pinned {
   background: rgba(121, 84, 245, 0.14);
