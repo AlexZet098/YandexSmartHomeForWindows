@@ -143,6 +143,7 @@ const state = {
     oauthRedirectUri: '',
     oauthScope: 'iot:view iot:control',
     tileLayout: {},
+    tileOrder: [],
     pinnedMetrics: [],
     enableTaskbarWidget: false,
     theme: 'system',
@@ -448,10 +449,31 @@ function getTileLayout(id) {
   return normalizeTileLayout(state.config.tileLayout[id]);
 }
 
+function getTileOrderIndex(id) {
+  const index = (state.config.tileOrder || []).indexOf(id);
+  return index === -1 ? Number.POSITIVE_INFINITY : index;
+}
+
+function sortTilesBySavedOrder(items, getId) {
+  return items
+    .map((item, index) => ({ item, index, order: getTileOrderIndex(getId(item)) }))
+    .sort((a, b) => (a.order - b.order) || (a.index - b.index))
+    .map((entry) => entry.item);
+}
+
 function setTileLayout(id, layout) {
   const nextLayout = normalizeTileLayout(layout);
   state.config.tileLayout = { ...state.config.tileLayout, [id]: nextLayout };
   window.smartHome?.updateConfig({ tileLayout: state.config.tileLayout });
+}
+
+function saveTileOrderFromDom() {
+  const order = [...elements.tileGrid.querySelectorAll('.device-tile')]
+    .map((tile) => tile.dataset.tileId)
+    .filter(Boolean);
+
+  state.config.tileOrder = order;
+  window.smartHome?.updateConfig({ tileOrder: order });
 }
 
 function getCollapsedTileLayout() {
@@ -1557,7 +1579,9 @@ function applyMasonryLayout() {
       }
     }
 
-    tile.style.transform = `translate(${best.x}px, ${best.y}px)`;
+    if (!tile.classList.contains('is-dragging')) {
+      tile.style.transform = `translate(${best.x}px, ${best.y}px)`;
+    }
     placed.push({ x: best.x, y: best.y, width: tileWidth, height: tileHeight });
     maxBottom = Math.max(maxBottom, best.y + tileHeight);
   });
@@ -1574,6 +1598,96 @@ function scheduleMasonryLayout() {
     masonryFrame = null;
     applyMasonryLayout();
   });
+}
+
+function attachTileDrag(node) {
+  const dragHandle = node.querySelector('.tile-main');
+  if (!dragHandle) {
+    return;
+  }
+
+  dragHandle.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || event.target.closest('button, input, select, .property-chip, .resize-handle')) {
+      return;
+    }
+
+    const containerRect = elements.tileGrid.getBoundingClientRect();
+    const tileRect = node.getBoundingClientRect();
+    const offsetX = event.clientX - tileRect.left;
+    const offsetY = event.clientY - tileRect.top;
+    const startX = event.clientX;
+    const startY = event.clientY;
+    let dragging = false;
+
+    const moveTile = (moveEvent) => {
+      const distance = Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY);
+      if (!dragging && distance < 7) {
+        return;
+      }
+
+      if (!dragging) {
+        dragging = true;
+        node.classList.add('is-dragging');
+        node.setPointerCapture(event.pointerId);
+      }
+
+      const x = moveEvent.clientX - containerRect.left - offsetX + elements.tileGrid.scrollLeft;
+      const y = moveEvent.clientY - containerRect.top - offsetY + elements.tileGrid.scrollTop;
+      node.style.transform = `translate(${Math.max(0, x)}px, ${Math.max(0, y)}px)`;
+      reorderTileByPointer(node, moveEvent.clientX, moveEvent.clientY);
+    };
+
+    const finishDrag = () => {
+      node.removeEventListener('pointermove', moveTile);
+      node.removeEventListener('pointerup', finishDrag);
+      node.removeEventListener('pointercancel', finishDrag);
+
+      if (!dragging) {
+        return;
+      }
+
+      node.classList.remove('is-dragging');
+      node.dataset.suppressOpen = '1';
+      window.setTimeout(() => {
+        delete node.dataset.suppressOpen;
+      }, 0);
+      saveTileOrderFromDom();
+      scheduleMasonryLayout();
+    };
+
+    node.addEventListener('pointermove', moveTile);
+    node.addEventListener('pointerup', finishDrag);
+    node.addEventListener('pointercancel', finishDrag);
+  });
+}
+
+function reorderTileByPointer(activeTile, clientX, clientY) {
+  const tiles = [...elements.tileGrid.querySelectorAll('.device-tile:not(.is-dragging)')];
+  let nearest = null;
+  let nearestDistance = Number.POSITIVE_INFINITY;
+
+  tiles.forEach((tile) => {
+    const rect = tile.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const distance = Math.hypot(clientX - centerX, clientY - centerY);
+    if (distance < nearestDistance) {
+      nearest = tile;
+      nearestDistance = distance;
+    }
+  });
+
+  if (!nearest) {
+    return;
+  }
+
+  const rect = nearest.getBoundingClientRect();
+  const insertAfter = clientY > rect.top + rect.height / 2 || clientX > rect.left + rect.width / 2;
+  const referenceNode = insertAfter ? nearest.nextSibling : nearest;
+  if (referenceNode !== activeTile && referenceNode !== activeTile.nextSibling) {
+    elements.tileGrid.insertBefore(activeTile, referenceNode);
+    scheduleMasonryLayout();
+  }
 }
 
 function attachTileResize(node, id, onResize = null, limits = null) {
@@ -1690,7 +1804,7 @@ function updateDeviceTileAdaptiveContent(node, device) {
   const chips = createPropertyChips(device, layout);
   if (propertyRow) {
     propertyRow.hidden = chips.length === 0;
-      propertyRow.replaceChildren(...chips);
+    propertyRow.replaceChildren(...chips);
   }
   const controlArea = node.querySelector('.control-area');
   if (controlArea) {
@@ -1702,6 +1816,7 @@ function updateDeviceTileAdaptiveContent(node, device) {
 
 function createDeviceTile(device) {
   const node = elements.deviceTileTemplate.content.firstElementChild.cloneNode(true);
+  node.dataset.tileId = device.id;
   const limits = getTileResizeLimits(device);
   const layout = clampTileLayoutToLimits(getTileLayout(device.id), limits);
   applyTileLayout(node, layout);
@@ -1723,10 +1838,14 @@ function createDeviceTile(device) {
       openArea.classList.add('tile-open-area');
       openArea.addEventListener('click', (event) => {
         event.stopPropagation();
+        if (node.dataset.suppressOpen) {
+          return;
+        }
         openDeviceDetails(device.id);
       });
     });
   attachTileResize(node, device.id, () => updateDeviceTileAdaptiveContent(node, device), limits);
+  attachTileDrag(node);
   updateDeviceTileAdaptiveContent(node, device);
   return node;
 }
@@ -1734,6 +1853,7 @@ function createDeviceTile(device) {
 function createScenarioTile(scenario) {
   const tile = document.createElement('article');
   tile.className = 'device-tile';
+  tile.dataset.tileId = `scenario:${scenario.id}`;
   applyTileLayout(tile, getTileLayout(`scenario:${scenario.id}`));
   tile.innerHTML = `
     <div class="tile-main">
@@ -1756,6 +1876,7 @@ function createScenarioTile(scenario) {
 
   tile.querySelector('.device-name').textContent = scenario.name;
   attachTileResize(tile, `scenario:${scenario.id}`);
+  attachTileDrag(tile);
   tile.querySelector('.scenario-button').addEventListener('click', async () => {
     if (!state.isDemo) {
       await window.smartHome.scenarioAction(scenario.id);
@@ -1863,14 +1984,17 @@ function closeDeviceDetails() {
 
 function getVisibleItems() {
   const query = state.search.trim().toLocaleLowerCase('ru-RU');
-  const devices = state.home.devices.filter((device) => {
+  const devices = sortTilesBySavedOrder(state.home.devices.filter((device) => {
     const matchesRoom = state.filter === 'all' || device.room === state.filter;
     const matchesSearch = !query || `${device.name} ${getRoomName(device.room)}`.toLocaleLowerCase('ru-RU').includes(query);
     return matchesRoom && matchesSearch;
-  });
+  }), (device) => device.id);
 
   const scenarios = state.filter === 'scenarios'
-    ? state.home.scenarios.filter((scenario) => !query || scenario.name.toLocaleLowerCase('ru-RU').includes(query))
+    ? sortTilesBySavedOrder(
+        state.home.scenarios.filter((scenario) => !query || scenario.name.toLocaleLowerCase('ru-RU').includes(query)),
+        (scenario) => `scenario:${scenario.id}`
+      )
     : [];
 
   return { devices, scenarios };

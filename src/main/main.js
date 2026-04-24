@@ -19,12 +19,14 @@ const DEFAULT_CONFIG = {
   enableTaskbarWidget: false,
   theme: 'system',
   tilesAutoExpanded: true,
+  taskbarWidgetBounds: null,
   deviceId: null,
   encryptedAuth: null,
   plainAuth: null,
   encryptedToken: null,
   plainToken: null,
   tileLayout: {},
+  tileOrder: [],
   pinnedMetrics: []
 };
 
@@ -36,6 +38,7 @@ let oauthServer = null;
 let oauthLoginState = null;
 let trayMetricsText = '';
 let taskbarWidgetWindow = null;
+let taskbarWidgetSaveTimer = null;
 
 function getConfigPath() {
   return path.join(app.getPath('userData'), 'config.json');
@@ -403,39 +406,81 @@ function getTaskbarWidgetHtml() {
       user-select: none;
     }
     body {
-      display: flex;
+      padding: 6px;
+    }
+    .widget {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
       align-items: center;
-      justify-content: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(31, 58, 96, 0.96), rgba(21, 34, 58, 0.94));
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+      -webkit-app-region: drag;
+    }
+    .mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      background: radial-gradient(circle at 35% 30%, #fff 0 10%, #8f72ff 11% 45%, #4fd18b 46% 100%);
+      box-shadow: 0 6px 18px rgba(79, 209, 139, 0.32);
     }
     #metrics {
-      max-width: calc(100vw - 8px);
-      padding: 5px 11px;
-      border-radius: 999px;
-      background: rgba(24, 46, 76, 0.92);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
-      white-space: nowrap;
+      min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: normal;
+      line-height: 1.25;
+      font-weight: 650;
+    }
+    .resize-corner {
+      position: absolute;
+      right: 8px;
+      bottom: 7px;
+      width: 12px;
+      height: 12px;
+      border-right: 2px solid rgba(255, 255, 255, 0.32);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.32);
+      pointer-events: none;
     }
   </style>
 </head>
-<body><div id="metrics">Yandex Smart Home</div></body>
+<body><div class="widget"><div class="mark"></div><div id="metrics">Yandex Smart Home</div><div class="resize-corner"></div></div></body>
 </html>`;
 }
 
 function getTaskbarWidgetBounds(text = '') {
+  if (configCache.taskbarWidgetBounds) {
+    return configCache.taskbarWidgetBounds;
+  }
+
   const display = screen.getPrimaryDisplay();
   const bounds = display.bounds;
   const taskbarHeight = Math.max(40, bounds.height - display.workArea.height);
-  const width = Math.max(180, Math.min(520, String(text || '').length * 7 + 42));
-  const height = Math.min(44, taskbarHeight);
+  const width = Math.max(280, Math.min(560, String(text || '').length * 7 + 76));
+  const height = Math.max(56, Math.min(96, taskbarHeight + 20));
 
   return {
     width,
     height,
     x: bounds.x + bounds.width - width - 360,
-    y: bounds.y + bounds.height - height
+    y: bounds.y + bounds.height - height - 8
   };
+}
+
+function saveTaskbarWidgetBounds() {
+  if (!taskbarWidgetWindow || taskbarWidgetWindow.isDestroyed()) {
+    return;
+  }
+
+  configCache.taskbarWidgetBounds = taskbarWidgetWindow.getBounds();
+  clearTimeout(taskbarWidgetSaveTimer);
+  taskbarWidgetSaveTimer = setTimeout(() => {
+    saveConfig(configCache).catch(() => {});
+  }, 350);
 }
 
 function createTaskbarWidget() {
@@ -447,12 +492,14 @@ function createTaskbarWidget() {
     ...getTaskbarWidgetBounds(trayMetricsText),
     frame: false,
     transparent: true,
-    resizable: false,
-    movable: false,
-    focusable: false,
+    resizable: true,
+    movable: true,
+    focusable: true,
     skipTaskbar: true,
     alwaysOnTop: true,
     hasShadow: false,
+    minWidth: 220,
+    minHeight: 48,
     show: false,
     webPreferences: {
       contextIsolation: true,
@@ -470,6 +517,8 @@ function createTaskbarWidget() {
   taskbarWidgetWindow.on('closed', () => {
     taskbarWidgetWindow = null;
   });
+  taskbarWidgetWindow.on('move', saveTaskbarWidgetBounds);
+  taskbarWidgetWindow.on('resize', saveTaskbarWidgetBounds);
 }
 
 function destroyTaskbarWidget() {
@@ -477,6 +526,7 @@ function destroyTaskbarWidget() {
     return;
   }
 
+  saveTaskbarWidgetBounds();
   const target = taskbarWidgetWindow;
   taskbarWidgetWindow = null;
   target.close();
@@ -494,7 +544,6 @@ function updateTaskbarWidget() {
   }
 
   const text = trayMetricsText || 'Нет выбранных показателей';
-  taskbarWidgetWindow.setBounds(getTaskbarWidgetBounds(text));
   taskbarWidgetWindow.webContents.executeJavaScript(
     `document.getElementById('metrics').textContent = ${JSON.stringify(text.replaceAll('\n', '   '))};`,
     true
@@ -593,7 +642,9 @@ async function getAppState() {
       enableTaskbarWidget: configCache.enableTaskbarWidget,
       theme: configCache.theme,
       tilesAutoExpanded: configCache.tilesAutoExpanded,
+      taskbarWidgetBounds: configCache.taskbarWidgetBounds,
       tileLayout: configCache.tileLayout,
+      tileOrder: configCache.tileOrder,
       pinnedMetrics: configCache.pinnedMetrics,
       tokenEncrypted: Boolean(configCache.encryptedToken || configCache.encryptedAuth),
       hasToken: Boolean(getAuthData()?.access_token || getLegacyToken())
