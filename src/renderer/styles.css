@@ -1,5 +1,4 @@
 :root {
-  color-scheme: light;
   --bg: #f3f4f8;
   --surface: #ffffff;
   --surface-soft: #eceef5;
@@ -14,6 +13,30 @@
   --radius: 8px;
   --grid-row: 64px;
   font-family: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body[data-theme="dark"] {
+  --bg: #11131b;
+  --surface: #202432;
+  --surface-soft: #303545;
+  --surface-strong: #3c4254;
+  --text: #f5f7ff;
+  --muted: #aeb5c4;
+  --subtle: #8991a4;
+  --border: rgba(255, 255, 255, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  body[data-theme="system"] {
+    --bg: #11131b;
+    --surface: #202432;
+    --surface-soft: #303545;
+    --surface-strong: #3c4254;
+    --text: #f5f7ff;
+    --muted: #aeb5c4;
+    --subtle: #8991a4;
+    --border: rgba(255, 255, 255, 0.08);
+  }
 }
 
 * {
@@ -35,11 +58,13 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
-input {
+input,
+select {
   user-select: text;
 }
 
@@ -109,8 +134,10 @@ h1 {
 }
 
 .icon-button:hover,
+.icon-button.active,
 .text-button:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(121, 84, 245, 0.14);
+  color: var(--accent);
 }
 
 .icon-button:active,
@@ -275,7 +302,8 @@ h1 {
 }
 
 .search-field input,
-.field input {
+.field input,
+.field select {
   width: 100%;
   min-height: 38px;
   border: 0;
@@ -289,7 +317,8 @@ h1 {
   padding: 0 12px;
 }
 
-.field input {
+.field input,
+.field select {
   margin-top: 8px;
   padding: 0 12px;
 }
@@ -1015,6 +1044,7 @@ h1 {
   border: 0;
 }
 
+.icon-fit,
 .icon-refresh,
 .icon-close,
 .icon-settings {
@@ -1022,6 +1052,10 @@ h1 {
   height: 18px;
   display: inline-block;
   background: currentColor;
+}
+
+.icon-fit {
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 4h7v2H6v5H4V4Zm9 0h7v7h-2V6h-5V4ZM6 13v5h5v2H4v-7h2Zm12 0h2v7h-7v-2h5v-5Z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 .icon-refresh {

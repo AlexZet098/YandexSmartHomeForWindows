@@ -145,6 +145,8 @@ const state = {
     tileLayout: {},
     pinnedMetrics: [],
     enableTaskbarWidget: false,
+    theme: 'system',
+    tilesAutoExpanded: true,
     hasToken: false
   },
   filter: 'all',
@@ -166,6 +168,7 @@ const elements = {
   tabs: document.querySelector('#tabs'),
   tileGrid: document.querySelector('#tileGrid'),
   searchInput: document.querySelector('#searchInput'),
+  autoSizeTilesButton: document.querySelector('#autoSizeTilesButton'),
   refreshButton: document.querySelector('#refreshButton'),
   settingsButton: document.querySelector('#settingsButton'),
   settingsDialog: document.querySelector('#settingsDialog'),
@@ -174,6 +177,7 @@ const elements = {
   runInTrayInput: document.querySelector('#runInTrayInput'),
   launchAtLoginInput: document.querySelector('#launchAtLoginInput'),
   taskbarWidgetInput: document.querySelector('#taskbarWidgetInput'),
+  themeSelect: document.querySelector('#themeSelect'),
   deviceDialog: document.querySelector('#deviceDialog'),
   closeDeviceDialog: document.querySelector('#closeDeviceDialog'),
   detailIcon: document.querySelector('#detailIcon'),
@@ -450,6 +454,44 @@ function setTileLayout(id, layout) {
   window.smartHome?.updateConfig({ tileLayout: state.config.tileLayout });
 }
 
+function getCollapsedTileLayout() {
+  return normalizeTileLayout({ width: MIN_TILE_WIDTH, height: MIN_TILE_HEIGHT });
+}
+
+function getExpandedTileLayout(device) {
+  const propertyCount = getTilePropertyCount(device);
+  const columns = propertyCount > 1 ? 2 : 1;
+  const width = columns > 1 ? 456 : MIN_TILE_WIDTH;
+  const propertyRows = Math.ceil(propertyCount / columns);
+  const height = TILE_MIN_CONTENT_HEIGHT + propertyRows * TILE_PROPERTY_ROW_HEIGHT + (propertyRows ? 10 : 0);
+  return normalizeTileLayout({ width, height });
+}
+
+async function setAllTilesAutoSize(expanded) {
+  const nextLayout = { ...state.config.tileLayout };
+  (state.home.devices || []).forEach((device) => {
+    nextLayout[device.id] = expanded ? getExpandedTileLayout(device) : getCollapsedTileLayout(device);
+  });
+  (state.home.scenarios || []).forEach((scenario) => {
+    nextLayout[`scenario:${scenario.id}`] = getCollapsedTileLayout();
+  });
+
+  state.config.tilesAutoExpanded = expanded;
+  state.config.tileLayout = nextLayout;
+  await window.smartHome?.updateConfig({
+    tilesAutoExpanded: state.config.tilesAutoExpanded,
+    tileLayout: state.config.tileLayout
+  });
+  renderTiles();
+  renderStatus();
+}
+
+function applyTheme(theme = state.config.theme) {
+  const normalizedTheme = ['light', 'dark', 'system'].includes(theme) ? theme : 'system';
+  document.body.dataset.theme = normalizedTheme;
+  document.documentElement.style.colorScheme = normalizedTheme === 'dark' ? 'dark' : normalizedTheme === 'light' ? 'light' : 'light dark';
+}
+
 function getMaxGridColumns() {
   if (!elements.tileGrid) {
     return MAX_TILE_COLS;
@@ -520,9 +562,7 @@ function getTilePropertyLimit(layout, device = null) {
     return 0;
   }
 
-  const controlLimit = getTileControlLimit(layout, device);
-  const controlRows = controlLimit > 0 ? Math.ceil(controlLimit / 2) : 0;
-  const availableHeight = Number(layout.height) - TILE_MIN_CONTENT_HEIGHT - controlRows * TILE_CONTROL_ROW_HEIGHT;
+  const availableHeight = Number(layout.height) - TILE_MIN_CONTENT_HEIGHT;
   const propertyRows = Math.max(0, Math.floor(availableHeight / TILE_PROPERTY_ROW_HEIGHT));
   return Math.min(propertyCount, propertyRows * getTilePropertyColumnCount(layout));
 }
@@ -567,14 +607,11 @@ function getTileResizeLimits(device = null) {
   }
 
   const propertyCount = getTilePropertyCount(device);
-  const controlCount = getTileControlCount(device);
   const propertyRows = Math.ceil(propertyCount / 2);
-  const controlRows = Math.ceil(controlCount / 2);
-  const usefulWidth = propertyCount > 1 || controlCount > 1 ? 480 : 240;
+  const usefulWidth = propertyCount > 1 ? 456 : MIN_TILE_WIDTH;
   const usefulHeight = TILE_MIN_CONTENT_HEIGHT
     + propertyRows * TILE_PROPERTY_ROW_HEIGHT
-    + controlRows * TILE_CONTROL_ROW_HEIGHT
-    + (propertyCount || controlCount ? 10 : 0);
+    + (propertyCount ? 10 : 0);
 
   return {
     minWidth: MIN_TILE_WIDTH,
@@ -1653,13 +1690,13 @@ function updateDeviceTileAdaptiveContent(node, device) {
   const chips = createPropertyChips(device, layout);
   if (propertyRow) {
     propertyRow.hidden = chips.length === 0;
-    propertyRow.replaceChildren(...chips);
+      propertyRow.replaceChildren(...chips);
   }
-  renderControls(node.querySelector('.control-area'), device, {
-    limit: getTileControlLimit(layout, device),
-    skipTypes: ['devices.capabilities.on_off'],
-    compact: true
-  });
+  const controlArea = node.querySelector('.control-area');
+  if (controlArea) {
+    controlArea.hidden = true;
+    controlArea.replaceChildren();
+  }
   scheduleMasonryLayout();
 }
 
@@ -1860,6 +1897,7 @@ function renderTiles() {
 }
 
 function renderStatus() {
+  applyTheme();
   elements.connectionStatus.textContent = state.isDemo
     ? (state.config.oauthConfigured ? 'Demo-режим, вход не выполнен' : 'OAuth приложения не настроен')
     : 'Подключено к Yandex API';
@@ -1872,6 +1910,11 @@ function renderStatus() {
   elements.runInTrayInput.checked = Boolean(state.config.runInTray);
   elements.launchAtLoginInput.checked = Boolean(state.config.launchAtLogin);
   elements.taskbarWidgetInput.checked = Boolean(state.config.enableTaskbarWidget);
+  elements.themeSelect.value = state.config.theme || 'system';
+  elements.autoSizeTilesButton.classList.toggle('active', Boolean(state.config.tilesAutoExpanded));
+  elements.autoSizeTilesButton.title = state.config.tilesAutoExpanded
+    ? 'Скрыть показатели и уменьшить плитки'
+    : 'Раскрыть плитки под показатели';
 }
 
 function render() {
@@ -1942,6 +1985,9 @@ async function bootstrap() {
   }
 
   elements.refreshButton.addEventListener('click', refreshHome);
+  elements.autoSizeTilesButton.addEventListener('click', () => {
+    setAllTilesAutoSize(!state.config.tilesAutoExpanded);
+  });
   elements.settingsButton.addEventListener('click', () => elements.settingsDialog.showModal());
   elements.closeDeviceDialog.addEventListener('click', closeDeviceDetails);
   elements.closeHistoryDialog.addEventListener('click', closeMetricHistory);
@@ -2035,6 +2081,12 @@ async function bootstrap() {
     state.config.enableTaskbarWidget = event.target.checked;
     await window.smartHome.updateConfig({ enableTaskbarWidget: state.config.enableTaskbarWidget });
     syncWindowsPanelMetrics();
+  });
+
+  elements.themeSelect.addEventListener('change', async (event) => {
+    state.config.theme = event.target.value;
+    applyTheme();
+    await window.smartHome.updateConfig({ theme: state.config.theme });
   });
 
   render();

@@ -14,6 +14,9 @@
           <div class="summary" id="homeSummary">Плитки устройств и сценариев</div>
         </div>
         <div class="topbar-actions">
+          <button class="icon-button" id="autoSizeTilesButton" title="Автоподбор размера плиток" aria-label="Автоподбор размера плиток">
+            <span class="icon-fit" aria-hidden="true"></span>
+          </button>
           <button class="icon-button" id="refreshButton" title="Обновить" aria-label="Обновить">
             <span class="icon-refresh" aria-hidden="true"></span>
           </button>
@@ -65,6 +68,14 @@
         </div>
 
         <div class="settings-switches">
+          <label class="field">
+            <span>Тема оформления</span>
+            <select id="themeSelect">
+              <option value="system">Системная</option>
+              <option value="light">Светлая</option>
+              <option value="dark">Темная</option>
+            </select>
+          </label>
           <label class="switch-line">
             <input id="runInTrayInput" type="checkbox">
             <span>Работать в фоне после закрытия окна</span>
