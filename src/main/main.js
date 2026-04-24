@@ -553,15 +553,18 @@ function renderTaskbarWidgetScript(text) {
     : [];
   const metrics = lines.map(parseTrayMetric);
   return `
-    const root = document.getElementById('metrics');
-    const metrics = ${JSON.stringify(metrics)};
-    root.replaceChildren();
-    if (!metrics.length) {
-      const empty = document.createElement('div');
-      empty.className = 'metric-empty';
-      empty.innerHTML = '<strong>Нет выбранных показателей</strong><small>Откройте график показателя и нажмите звезду. Виджет обновится сразу после выбора.</small>';
-      root.append(empty);
-    } else {
+    (() => {
+      const root = document.getElementById('metrics');
+      const metrics = ${JSON.stringify(metrics)};
+      root.replaceChildren();
+      if (!metrics.length) {
+        const empty = document.createElement('div');
+        empty.className = 'metric-empty';
+        empty.innerHTML = '<strong>Нет выбранных показателей</strong><small>Откройте график показателя и нажмите звезду. Виджет обновится сразу после выбора.</small>';
+        root.append(empty);
+        return;
+      }
+
       metrics.forEach((metric) => {
         const card = document.createElement('article');
         card.className = 'metric-card';
@@ -572,7 +575,7 @@ function renderTaskbarWidgetScript(text) {
         card.querySelector('.metric-kind').textContent = metric.kind;
         root.append(card);
       });
-    }
+    })();
   `;
 }
 
