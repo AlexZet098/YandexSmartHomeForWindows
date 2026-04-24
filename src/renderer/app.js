@@ -19,7 +19,7 @@ const MAX_TILE_HEIGHT = 440;
 const TILE_MIN_CONTENT_HEIGHT = 178;
 const TILE_PROPERTY_ROW_HEIGHT = 28;
 const TILE_CONTROL_ROW_HEIGHT = 46;
-const MASONRY_GAP = 0;
+const MASONRY_GAP = 8;
 const MASONRY_STEP = 1;
 
 let masonryFrame = null;
