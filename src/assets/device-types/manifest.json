@@ -1,0 +1,194 @@
+{
+  "devices.types.sensor": {
+    "file": "../assets/device-types/devices.types.sensor.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/sensor.png"
+  },
+  "devices.types.sensor.button": {
+    "file": "../assets/device-types/devices.types.sensor.button.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/sensor-button.png"
+  },
+  "devices.types.sensor.climate": {
+    "file": "../assets/device-types/devices.types.sensor.climate.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/sensor-climate.png"
+  },
+  "devices.types.sensor.gas": {
+    "file": "../assets/device-types/devices.types.sensor.gas.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/sensor-gas.png"
+  },
+  "devices.types.sensor.illumination": {
+    "file": "../assets/device-types/devices.types.sensor.illumination.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/sensor-illumination.png"
+  },
+  "devices.types.sensor.motion": {
+    "file": "../assets/device-types/devices.types.sensor.motion.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/sensor-motion.png"
+  },
+  "devices.types.sensor.open": {
+    "file": "../assets/device-types/devices.types.sensor.open.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/sensor-open.png"
+  },
+  "devices.types.sensor.smoke": {
+    "file": "../assets/device-types/devices.types.sensor.smoke.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/sensor-smoke.png"
+  },
+  "devices.types.sensor.vibration": {
+    "file": "../assets/device-types/devices.types.sensor.vibration.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/sensor-vibration.png"
+  },
+  "devices.types.sensor.water_leak": {
+    "file": "../assets/device-types/devices.types.sensor.water_leak.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/sensor-water-leak.png"
+  },
+  "devices.types.smart_meter": {
+    "file": "../assets/device-types/devices.types.smart_meter.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/smart-meter.png"
+  },
+  "devices.types.smart_meter.cold_water": {
+    "file": "../assets/device-types/devices.types.smart_meter.cold_water.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/smart-meter-cold-water.png"
+  },
+  "devices.types.smart_meter.electricity": {
+    "file": "../assets/device-types/devices.types.smart_meter.electricity.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/smart-meter-electricity.png"
+  },
+  "devices.types.smart_meter.gas": {
+    "file": "../assets/device-types/devices.types.smart_meter.gas.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/smart-meter-gas.png"
+  },
+  "devices.types.smart_meter.heat": {
+    "file": "../assets/device-types/devices.types.smart_meter.heat.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/smart-meter-heat.png"
+  },
+  "devices.types.smart_meter.hot_water": {
+    "file": "../assets/device-types/devices.types.smart_meter.hot_water.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/smart-meter-hot-water.png"
+  },
+  "devices.types.camera": {
+    "file": "../assets/device-types/devices.types.camera.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/camera.png"
+  },
+  "devices.types.media_device": {
+    "file": "../assets/device-types/devices.types.media_device.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/media-device.png"
+  },
+  "devices.types.media_device.receiver": {
+    "file": "../assets/device-types/devices.types.media_device.receiver.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/media-device-receiver.png"
+  },
+  "devices.types.media_device.tv": {
+    "file": "../assets/device-types/devices.types.media_device.tv.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/media-device-tv.png"
+  },
+  "devices.types.media_device.tv_box": {
+    "file": "../assets/device-types/devices.types.media_device.tv_box.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/media-device-tv-box.png"
+  },
+  "devices.types.cooking": {
+    "file": "../assets/device-types/devices.types.cooking.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/cooking.png"
+  },
+  "devices.types.cooking.coffee_maker": {
+    "file": "../assets/device-types/devices.types.cooking.coffee_maker.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/cooking-coffee-maker.png"
+  },
+  "devices.types.cooking.kettle": {
+    "file": "../assets/device-types/devices.types.cooking.kettle.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/cooking-kettle.png"
+  },
+  "devices.types.cooking.multicooker": {
+    "file": "../assets/device-types/devices.types.cooking.multicooker.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/cooking-multicooker.png"
+  },
+  "devices.types.dishwasher": {
+    "file": "../assets/device-types/devices.types.dishwasher.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/dishwasher.png"
+  },
+  "devices.types.iron": {
+    "file": "../assets/device-types/devices.types.iron.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/iron.png"
+  },
+  "devices.types.vacuum_cleaner": {
+    "file": "../assets/device-types/devices.types.vacuum_cleaner.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/vacuum-cleaner.png"
+  },
+  "devices.types.ventilation": {
+    "file": "../assets/device-types/devices.types.ventilation.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/ventilation.png"
+  },
+  "devices.types.ventilation.fan": {
+    "file": "../assets/device-types/devices.types.ventilation.fan.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/ventilation-fan.png"
+  },
+  "devices.types.washing_machine": {
+    "file": "../assets/device-types/devices.types.washing_machine.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/washing-machine.png"
+  },
+  "devices.types.pet_drinking_fountain": {
+    "file": "../assets/device-types/devices.types.pet_drinking_fountain.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/pet-drinking-fountain.png"
+  },
+  "devices.types.pet_feeder": {
+    "file": "../assets/device-types/devices.types.pet_feeder.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/pet-feeder.png"
+  },
+  "devices.types.humidifier": {
+    "file": "../assets/device-types/devices.types.humidifier.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/humidifier.png"
+  },
+  "devices.types.purifier": {
+    "file": "../assets/device-types/devices.types.purifier.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/purifier.png"
+  },
+  "devices.types.thermostat": {
+    "file": "../assets/device-types/devices.types.thermostat.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/thermostat.png"
+  },
+  "devices.types.thermostat.ac": {
+    "file": "../assets/device-types/devices.types.thermostat.ac.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/thermostat-ac.png"
+  },
+  "devices.types.light": {
+    "file": "../assets/device-types/devices.types.light.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/light.png"
+  },
+  "devices.types.light.lamp": {
+    "file": "../assets/device-types/devices.types.light.lamp.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/lamp.png"
+  },
+  "devices.types.light.ceiling": {
+    "file": "../assets/device-types/devices.types.light.ceiling.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/ceiling.png"
+  },
+  "devices.types.light.strip": {
+    "file": "../assets/device-types/devices.types.light.strip.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/strip.png"
+  },
+  "devices.types.socket": {
+    "file": "../assets/device-types/devices.types.socket.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/socket.png"
+  },
+  "devices.types.switch": {
+    "file": "../assets/device-types/devices.types.switch.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/switch.png"
+  },
+  "devices.types.switch.relay": {
+    "file": "../assets/device-types/devices.types.switch.relay.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/relay.png"
+  },
+  "devices.types.openable": {
+    "file": "../assets/device-types/devices.types.openable.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/openable.png"
+  },
+  "devices.types.openable.curtain": {
+    "file": "../assets/device-types/devices.types.openable.curtain.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/openable-curtain.png"
+  },
+  "devices.types.openable.valve": {
+    "file": "../assets/device-types/devices.types.openable.valve.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/valve.png"
+  },
+  "devices.types.other": {
+    "file": "../assets/device-types/devices.types.other.png",
+    "source": "https://yandex.ru/dev/dialogs/smart-home/doc/docs-assets/dev-dialogs-smart-home/rev/r17945630/en/_images/concept.devices/other.png"
+  }
+}

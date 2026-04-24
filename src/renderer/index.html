@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yandex Smart Home</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>Мой дом</h1>
+          <div class="summary" id="homeSummary">Плитки устройств и сценариев</div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-button" id="refreshButton" title="Обновить" aria-label="Обновить">
+            <span class="icon-refresh" aria-hidden="true"></span>
+          </button>
+          <button class="icon-button" id="settingsButton" title="Настройки" aria-label="Настройки">
+            <span class="icon-settings" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <section class="status-strip" aria-label="Сводка">
+        <div class="status-card connection-card">
+          <div class="status-dot" aria-hidden="true"></div>
+          <div>
+            <div class="status-label">Статус</div>
+            <div class="status-line" id="connectionStatus">Demo-режим</div>
+          </div>
+        </div>
+        <div class="quick-stats" id="quickStats" aria-label="Показатели"></div>
+      </section>
+
+      <nav class="room-list" id="roomList" aria-label="Комнаты"></nav>
+
+      <section class="toolbar" aria-label="Фильтры">
+        <div class="tabs" id="tabs"></div>
+        <label class="search-field">
+          <span class="visually-hidden">Поиск</span>
+          <input id="searchInput" type="search" placeholder="Поиск">
+        </label>
+      </section>
+
+      <section class="tile-grid" id="tileGrid" aria-live="polite"></section>
+    </main>
+
+    <dialog class="settings-dialog" id="settingsDialog">
+      <form method="dialog" class="settings-content">
+        <div class="dialog-header">
+          <div>
+            <h2>Настройки</h2>
+            <p>Вход выполняется через Яндекс ID с доступами iot:view и iot:control.</p>
+          </div>
+          <button class="icon-button" value="cancel" title="Закрыть" aria-label="Закрыть">
+            <span class="icon-close" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="dialog-actions">
+          <button class="text-button muted" id="clearTokenButton" type="button">Выйти</button>
+          <button class="primary-button" id="loginButton" type="button">Войти через Яндекс</button>
+        </div>
+
+        <div class="settings-switches">
+          <label class="switch-line">
+            <input id="runInTrayInput" type="checkbox">
+            <span>Работать в фоне после закрытия окна</span>
+          </label>
+          <label class="switch-line">
+            <input id="launchAtLoginInput" type="checkbox">
+            <span>Запускать вместе с Windows</span>
+          </label>
+          <label class="switch-line">
+            <input id="taskbarWidgetInput" type="checkbox">
+            <span>Показывать выбранные показатели у панели задач Windows</span>
+          </label>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="device-dialog" id="deviceDialog">
+      <button class="detail-close-button" id="closeDeviceDialog" type="button" title="Закрыть" aria-label="Закрыть">
+        <span class="icon-close" aria-hidden="true"></span>
+      </button>
+      <div class="device-dialog-content">
+        <div class="detail-header">
+          <div class="detail-icon" id="detailIcon" aria-hidden="true"></div>
+          <div class="detail-title-block">
+            <div class="detail-room" id="detailRoom"></div>
+            <h2 id="detailName"></h2>
+            <div class="detail-meta" id="detailMeta"></div>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <section class="detail-section detail-controls-section">
+            <h3>Управление</h3>
+            <div class="detail-controls" id="detailControls"></div>
+          </section>
+
+          <section class="detail-section">
+            <h3>Параметры</h3>
+            <div class="detail-list" id="detailProperties"></div>
+          </section>
+
+          <section class="detail-section detail-wide">
+            <h3>Возможности</h3>
+            <div class="detail-list" id="detailCapabilities"></div>
+          </section>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="history-dialog" id="historyDialog">
+      <div class="history-content">
+        <button class="history-back" id="closeHistoryDialog" type="button" title="Назад" aria-label="Назад">‹</button>
+        <button class="history-star" id="pinHistoryMetric" type="button" title="Показывать на панели Windows" aria-label="Показывать на панели Windows">★</button>
+        <div class="history-title-block">
+          <h2 id="historyTitle">Показатель</h2>
+          <div class="historySubtitle" id="historySubtitle"></div>
+        </div>
+        <div class="history-ranges" id="historyRanges" aria-label="Период">
+          <button type="button" data-range="hour">Ч</button>
+          <button type="button" data-range="day" class="active">Д</button>
+          <button type="button" data-range="week">Н</button>
+          <button type="button" data-range="month">М</button>
+        </div>
+        <div class="history-chart-wrap">
+          <svg class="history-chart" id="historyChart" viewBox="0 0 1000 430" preserveAspectRatio="none" role="img"></svg>
+        </div>
+      </div>
+    </dialog>
+
+    <template id="deviceTileTemplate">
+      <article class="device-tile">
+        <div class="tile-main">
+          <button class="power-switch" type="button" aria-label="Переключить питание">
+            <span></span>
+          </button>
+          <div class="tile-header">
+            <div class="device-icon" aria-hidden="true"></div>
+          </div>
+          <div class="device-body">
+            <div class="room-name"></div>
+            <h2 class="device-name"></h2>
+            <div class="property-row"></div>
+          </div>
+          <div class="control-area"></div>
+        </div>
+        <div class="resize-handle resize-e" data-resize-axis="x" aria-hidden="true"></div>
+        <div class="resize-handle resize-s" data-resize-axis="y" aria-hidden="true"></div>
+        <div class="resize-handle resize-se" data-resize-axis="xy" aria-hidden="true"></div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
