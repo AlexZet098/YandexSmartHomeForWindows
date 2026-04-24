@@ -399,7 +399,7 @@ function getTaskbarWidgetHtml() {
       width: 100%;
       height: 100%;
       margin: 0;
-      overflow: auto;
+      overflow: hidden;
       background: transparent;
       font: 12px "Segoe UI", system-ui, sans-serif;
       color: #f4f7ff;
@@ -409,10 +409,13 @@ function getTaskbarWidgetHtml() {
       padding: 6px;
     }
     #metrics {
+      width: 100%;
+      height: 100%;
       min-height: 100%;
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+      overflow: hidden;
       -webkit-app-region: drag;
     }
     .metric-card {
@@ -467,6 +470,7 @@ function getTaskbarWidgetHtml() {
     }
     .metric-empty {
       width: 100%;
+      height: 100%;
       min-height: 72px;
       display: grid;
       place-items: center;
@@ -505,7 +509,18 @@ function getMetricIcon(kind = '') {
 }
 
 function parseTrayMetric(line = '') {
-  const [namePart, rest = ''] = String(line).split(':');
+  const separator = String(line).indexOf(':');
+  if (separator === -1) {
+    return {
+      name: String(line).trim() || 'Датчик',
+      kind: 'Показатель',
+      value: String(line).trim() || '—',
+      icon: '•'
+    };
+  }
+
+  const namePart = String(line).slice(0, separator);
+  const rest = String(line).slice(separator + 1);
   const trimmedRest = rest.trim();
   const firstSpace = trimmedRest.indexOf(' ');
   const kind = firstSpace === -1 ? '' : trimmedRest.slice(0, firstSpace);
@@ -519,7 +534,10 @@ function parseTrayMetric(line = '') {
 }
 
 function renderTaskbarWidgetScript(text) {
-  const lines = String(text || '').split('\n').map((line) => line.trim()).filter(Boolean);
+  const normalizedText = String(text || '').trim();
+  const lines = normalizedText && normalizedText !== 'Нет выбранных показателей'
+    ? normalizedText.split('\n').map((line) => line.trim()).filter(Boolean)
+    : [];
   const metrics = lines.map(parseTrayMetric);
   return `
     const root = document.getElementById('metrics');
