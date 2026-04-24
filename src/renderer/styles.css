@@ -295,17 +295,16 @@ h1 {
 }
 
 .tile-grid {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 8px;
+  position: relative;
+  display: block;
   margin-top: 12px;
   padding-bottom: 28px;
 }
 
 .device-tile {
-  position: relative;
-  flex: 0 0 auto;
+  position: absolute;
+  top: 0;
+  left: 0;
   min-width: 198px;
   min-height: 182px;
   border: 0;
@@ -313,12 +312,14 @@ h1 {
   background: var(--surface);
   box-shadow: 0 10px 24px rgba(27, 31, 42, 0.08);
   overflow: hidden;
+  transition: transform 150ms ease;
 }
 
 .device-tile.is-resizing {
   outline: 2px solid rgba(121, 84, 245, 0.85);
   outline-offset: -2px;
   z-index: 5;
+  transition: none;
 }
 
 .device-tile.is-off .device-icon,
@@ -485,10 +486,19 @@ h1 {
 .scenario-button {
   position: relative;
   min-height: 38px;
+  min-width: 0;
+  padding: 0 8px;
   border-radius: var(--radius);
   background: var(--surface-soft);
   color: var(--muted);
   cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compact-control {
+  min-height: 38px;
 }
 
 .control-button:hover,

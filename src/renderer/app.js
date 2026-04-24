@@ -19,6 +19,10 @@ const MAX_TILE_HEIGHT = 440;
 const TILE_MIN_CONTENT_HEIGHT = 178;
 const TILE_PROPERTY_ROW_HEIGHT = 28;
 const TILE_CONTROL_ROW_HEIGHT = 46;
+const MASONRY_GAP = 8;
+const MASONRY_STEP = 8;
+
+let masonryFrame = null;
 
 const demoHome = {
   status: 'ok',
@@ -1387,6 +1391,18 @@ function createModeControl(device, capability) {
   return wrapper;
 }
 
+function createCompactCapabilityControl(device, capability) {
+  const button = document.createElement('button');
+  const instance = capability.state?.instance || capability.parameters?.instance || '';
+  const value = capability.state?.value;
+  button.type = 'button';
+  button.className = `control-button compact-control ${value === true ? 'active' : ''}`;
+  button.textContent = formatCapabilityState(capability) || localizeInstance(instance);
+  button.title = `${getCapabilityName(capability)}: открыть параметры устройства`;
+  button.addEventListener('click', () => openDeviceDetails(device.id));
+  return button;
+}
+
 function renderControls(container, device, options = {}) {
   if (!container) {
     return;
@@ -1403,6 +1419,11 @@ function renderControls(container, device, options = {}) {
     }
 
     if (skipTypes.has(capability.type)) {
+      return;
+    }
+
+    if (options.compact) {
+      controls.push(createCompactCapabilityControl(device, capability));
       return;
     }
 
@@ -1455,6 +1476,69 @@ function getNodeTileLayout(node) {
   };
 }
 
+function applyMasonryLayout() {
+  const container = elements.tileGrid;
+  if (!container) {
+    return;
+  }
+
+  const tiles = [...container.children].filter((node) => node.classList.contains('device-tile'));
+  if (!tiles.length) {
+    container.style.height = '';
+    return;
+  }
+
+  const containerWidth = Math.max(0, container.clientWidth);
+  const placed = [];
+  let maxBottom = 0;
+
+  tiles.forEach((tile) => {
+    const tileWidth = Math.min(tile.offsetWidth, containerWidth);
+    const tileHeight = tile.offsetHeight;
+    const maxX = Math.max(0, containerWidth - tileWidth);
+    let best = { x: 0, y: Number.POSITIVE_INFINITY };
+
+    for (let x = 0; x <= maxX; x += MASONRY_STEP) {
+      let y = 0;
+      let changed = true;
+
+      while (changed) {
+        changed = false;
+        for (const rect of placed) {
+          const overlapsX = x < rect.x + rect.width + MASONRY_GAP && x + tileWidth + MASONRY_GAP > rect.x;
+          const overlapsY = y < rect.y + rect.height + MASONRY_GAP && y + tileHeight + MASONRY_GAP > rect.y;
+          if (overlapsX && overlapsY) {
+            y = rect.y + rect.height + MASONRY_GAP;
+            changed = true;
+            break;
+          }
+        }
+      }
+
+      if (y < best.y || (y === best.y && x < best.x)) {
+        best = { x, y };
+      }
+    }
+
+    tile.style.transform = `translate(${best.x}px, ${best.y}px)`;
+    placed.push({ x: best.x, y: best.y, width: tileWidth, height: tileHeight });
+    maxBottom = Math.max(maxBottom, best.y + tileHeight);
+  });
+
+  container.style.height = `${maxBottom}px`;
+}
+
+function scheduleMasonryLayout() {
+  if (masonryFrame) {
+    return;
+  }
+
+  masonryFrame = window.requestAnimationFrame(() => {
+    masonryFrame = null;
+    applyMasonryLayout();
+  });
+}
+
 function attachTileResize(node, id, onResize = null, limits = null) {
   node.querySelectorAll('.resize-handle').forEach((handle) => {
     handle.addEventListener('pointerdown', (event) => {
@@ -1492,6 +1576,7 @@ function attachTileResize(node, id, onResize = null, limits = null) {
 
         applyTileLayout(node, nextLayout);
         requestResizeUpdate();
+        scheduleMasonryLayout();
       };
 
       const onPointerUp = () => {
@@ -1572,8 +1657,10 @@ function updateDeviceTileAdaptiveContent(node, device) {
   }
   renderControls(node.querySelector('.control-area'), device, {
     limit: getTileControlLimit(layout, device),
-    skipTypes: ['devices.capabilities.on_off']
+    skipTypes: ['devices.capabilities.on_off'],
+    compact: true
   });
+  scheduleMasonryLayout();
 }
 
 function createDeviceTile(device) {
@@ -1763,11 +1850,13 @@ function renderTiles() {
     const emptyState = document.createElement('div');
     emptyState.className = 'empty-state';
     emptyState.textContent = 'Нет элементов для выбранного фильтра.';
+    elements.tileGrid.style.height = '';
     elements.tileGrid.replaceChildren(emptyState);
     return;
   }
 
   elements.tileGrid.replaceChildren(...tiles);
+  scheduleMasonryLayout();
 }
 
 function renderStatus() {
@@ -1899,6 +1988,7 @@ async function bootstrap() {
     state.search = event.target.value;
     renderTiles();
   });
+  window.addEventListener('resize', scheduleMasonryLayout);
 
   elements.loginButton.addEventListener('click', async () => {
     try {
