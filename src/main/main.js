@@ -399,7 +399,7 @@ function getTaskbarWidgetHtml() {
       width: 100%;
       height: 100%;
       margin: 0;
-      overflow: hidden;
+      overflow: auto;
       background: transparent;
       font: 12px "Segoe UI", system-ui, sans-serif;
       color: #f4f7ff;
@@ -408,33 +408,73 @@ function getTaskbarWidgetHtml() {
     body {
       padding: 6px;
     }
-    .widget {
-      width: 100%;
-      height: 100%;
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      align-items: center;
+    #metrics {
+      min-height: 100%;
+      display: flex;
+      flex-wrap: wrap;
       gap: 8px;
-      padding: 8px 12px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, rgba(31, 58, 96, 0.96), rgba(21, 34, 58, 0.94));
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.16);
       -webkit-app-region: drag;
     }
-    .mark {
-      width: 28px;
-      height: 28px;
-      border-radius: 10px;
-      background: radial-gradient(circle at 35% 30%, #fff 0 10%, #8f72ff 11% 45%, #4fd18b 46% 100%);
-      box-shadow: 0 6px 18px rgba(79, 209, 139, 0.32);
-    }
-    #metrics {
+    .metric-card {
+      position: relative;
+      flex: 1 1 168px;
       min-width: 0;
+      min-height: 96px;
+      padding: 12px 14px;
+      border-radius: 22px;
+      overflow: hidden;
+      background: radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.58), transparent 28%),
+        linear-gradient(135deg, #78b9ff 0%, #3978f2 54%, #3157b7 100%);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    }
+    .metric-card::after {
+      content: attr(data-icon);
+      position: absolute;
+      right: 12px;
+      bottom: 4px;
+      font-size: 68px;
+      line-height: 1;
+      opacity: 0.22;
+      filter: blur(0.1px);
+    }
+    .metric-name,
+    .metric-kind,
+    .metric-value {
+      position: relative;
+      z-index: 1;
+    }
+    .metric-name {
+      max-width: 82%;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: normal;
-      line-height: 1.25;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 750;
+      opacity: 0.96;
+    }
+    .metric-value {
+      margin-top: 10px;
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      font-weight: 820;
+    }
+    .metric-kind {
+      margin-top: 8px;
+      font-size: 12px;
       font-weight: 650;
+      opacity: 0.82;
+    }
+    .metric-empty {
+      width: 100%;
+      min-height: 72px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(31, 58, 96, 0.96), rgba(21, 34, 58, 0.94));
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+      font-weight: 700;
+      -webkit-app-region: drag;
     }
     .resize-corner {
       position: absolute;
@@ -448,8 +488,61 @@ function getTaskbarWidgetHtml() {
     }
   </style>
 </head>
-<body><div class="widget"><div class="mark"></div><div id="metrics">Yandex Smart Home</div><div class="resize-corner"></div></div></body>
+<body><div id="metrics"></div><div class="resize-corner"></div></body>
 </html>`;
+}
+
+function getMetricIcon(kind = '') {
+  const value = String(kind).toLowerCase();
+  if (value.includes('темпера')) return '♨';
+  if (value.includes('влаж')) return '●';
+  if (value.includes('давлен')) return '◎';
+  if (value.includes('мощ') || value.includes('напряж') || value.includes('ток')) return '⚡';
+  if (value.includes('батар')) return '▮';
+  if (value.includes('pm')) return 'PM';
+  if (value.includes('свет') || value.includes('освещ')) return '☀';
+  return '•';
+}
+
+function parseTrayMetric(line = '') {
+  const [namePart, rest = ''] = String(line).split(':');
+  const trimmedRest = rest.trim();
+  const firstSpace = trimmedRest.indexOf(' ');
+  const kind = firstSpace === -1 ? '' : trimmedRest.slice(0, firstSpace);
+  const value = firstSpace === -1 ? trimmedRest : trimmedRest.slice(firstSpace + 1);
+  return {
+    name: namePart.trim() || 'Датчик',
+    kind: kind || 'Показатель',
+    value: value || trimmedRest || '—',
+    icon: getMetricIcon(kind)
+  };
+}
+
+function renderTaskbarWidgetScript(text) {
+  const lines = String(text || '').split('\n').map((line) => line.trim()).filter(Boolean);
+  const metrics = lines.map(parseTrayMetric);
+  return `
+    const root = document.getElementById('metrics');
+    const metrics = ${JSON.stringify(metrics)};
+    root.replaceChildren();
+    if (!metrics.length) {
+      const empty = document.createElement('div');
+      empty.className = 'metric-empty';
+      empty.textContent = 'Нет выбранных показателей';
+      root.append(empty);
+    } else {
+      metrics.forEach((metric) => {
+        const card = document.createElement('article');
+        card.className = 'metric-card';
+        card.dataset.icon = metric.icon;
+        card.innerHTML = '<div class="metric-name"></div><div class="metric-value"></div><div class="metric-kind"></div>';
+        card.querySelector('.metric-name').textContent = metric.name;
+        card.querySelector('.metric-value').textContent = metric.value;
+        card.querySelector('.metric-kind').textContent = metric.kind;
+        root.append(card);
+      });
+    }
+  `;
 }
 
 function getTaskbarWidgetBounds(text = '') {
@@ -544,10 +637,7 @@ function updateTaskbarWidget() {
   }
 
   const text = trayMetricsText || 'Нет выбранных показателей';
-  taskbarWidgetWindow.webContents.executeJavaScript(
-    `document.getElementById('metrics').textContent = ${JSON.stringify(text.replaceAll('\n', '   '))};`,
-    true
-  ).catch(() => {});
+  taskbarWidgetWindow.webContents.executeJavaScript(renderTaskbarWidgetScript(text), true).catch(() => {});
 }
 
 function showMainWindow() {
