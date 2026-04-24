@@ -472,13 +472,26 @@ function getTaskbarWidgetHtml() {
       width: 100%;
       height: 100%;
       min-height: 72px;
-      display: grid;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
       place-items: center;
+      padding: 18px;
       border-radius: 18px;
       background: linear-gradient(135deg, rgba(31, 58, 96, 0.96), rgba(21, 34, 58, 0.94));
       box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.16);
       font-weight: 700;
+      text-align: center;
       -webkit-app-region: drag;
+    }
+    .metric-empty small {
+      max-width: 320px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.35;
     }
     .resize-corner {
       position: absolute;
@@ -546,7 +559,7 @@ function renderTaskbarWidgetScript(text) {
     if (!metrics.length) {
       const empty = document.createElement('div');
       empty.className = 'metric-empty';
-      empty.textContent = 'Нет выбранных показателей';
+      empty.innerHTML = '<strong>Нет выбранных показателей</strong><small>Откройте график показателя и нажмите звезду. Виджет обновится сразу после выбора.</small>';
       root.append(empty);
     } else {
       metrics.forEach((metric) => {

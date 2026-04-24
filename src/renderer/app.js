@@ -919,7 +919,13 @@ async function setMetricPinned(metricKey, pinned) {
 
   state.config.pinnedMetrics = [...current];
   await window.smartHome?.updateConfig({ pinnedMetrics: state.config.pinnedMetrics });
+  const { deviceId, instance } = parseMetricKey(metricKey);
+  const metric = findMetric(deviceId, instance);
+  if (metric) {
+    recordMetricHistory();
+  }
   syncWindowsPanelMetrics();
+  renderTiles();
 }
 
 function toggleMetricPinned(metricKey) {
@@ -927,7 +933,11 @@ function toggleMetricPinned(metricKey) {
 }
 
 function getTrayMetricEntries() {
-  const allMetrics = (state.home.devices || []).flatMap((device) => (device.properties || [])
+  const devices = [
+    ...(state.home.devices || []),
+    ...Object.values(state.detailedDevices || {}).filter((device) => !(state.home.devices || []).some((item) => item.id === device.id))
+  ];
+  const allMetrics = devices.flatMap((device) => (device.properties || [])
     .map((property) => {
       const instance = getPropertyInstance(property);
       const value = getPropertyDisplayValue(property);
